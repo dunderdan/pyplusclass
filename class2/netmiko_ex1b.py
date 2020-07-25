@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
-1. Use the extended 'ping' command and Netmiko on the 'cisco4' router. This should prompt you for additional information as follows:
+1. Use the extended 'ping' command and Netmiko on the 'cisco4' router. 
+This should prompt you for additional information as follows:
 
 cisco4#ping
 Protocol [ip]: 
@@ -15,6 +16,30 @@ Sending 5, 100-byte ICMP Echos to 8.8.8.8, timeout is 2 seconds:
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/4 ms
 
-b. Use send_command() and the expect_string argument to handle the additional prompting. Once again specify a target IP address of '8.8.8.8'.
+b. Use send_command() and the expect_string argument to handle the additional prompting. 
+Once again specify a target IP address of '8.8.8.8'.
 """
+from netmiko import ConnectHandler
+from getpass import getpass
 
+ip_address_to_ping = '8.8.8.8'
+
+device = {
+    'host': 'cisco4.lasthop.io',
+    'username': 'pyclass',
+    'password': getpass(),
+    'device_type': 'cisco_ios',
+}
+
+net_connect = ConnectHandler(**device)
+output = net_connect.send_command('ping', expect_string=r'Protocol', strip_command=False)
+output += net_connect.send_command('\n', expect_string=r'Target IP', strip_prompt=False, strip_command=False)
+output += net_connect.send_command(ip_address_to_ping, expect_string=r'Repeat count', strip_prompt=False, strip_command=False)
+output += net_connect.send_command('\n', expect_string=r'Datagram size', strip_prompt=False, strip_command=False)
+output += net_connect.send_command('\n', expect_string=r'Timeout in seconds', strip_prompt=False, strip_command=False)
+output += net_connect.send_command('\n', expect_string=r'Extended commands', strip_prompt=False, strip_command=False)
+output += net_connect.send_command('\n', expect_string=r'Sweep range of sizes', strip_prompt=False, strip_command=False)
+output += net_connect.send_command('\n', expect_string=r'#', strip_prompt=False, strip_command=False)
+
+print(output)
+net_connect.disconnect()
