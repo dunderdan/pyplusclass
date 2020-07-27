@@ -25,4 +25,44 @@ f. Execute the enable() method and print your now current prompt using find_prom
 
 g. After you are done executing your script, look at the 'my_output.txt' file to see what is included in the session_log.
 """
+from getpass import getpass
+from netmiko import ConnectHandler
+import time
 
+password = getpass()
+device = {
+    "host": "cisco4.lasthop.io",
+    "username": "pyclass",
+    "password": password,
+    "secret": password,
+    "device_type": "cisco_ios",
+    "session_log": "my_output.txt",
+}
+net_connect = ConnectHandler(**device)
+print(net_connect.find_prompt())
+
+# Enter configuration mode
+print('-' * 25, 'Enter Configuration Mode', '-' * 25)
+net_connect.config_mode()
+print(net_connect.find_prompt())
+
+# Exit configuration mode
+print('-' * 25, 'Exit Configuration Mode', '-' * 25)
+net_connect.exit_config_mode()
+print(net_connect.find_prompt())
+
+# Exit priviledged exec 
+print('-' * 25, 'Exit Priviledged Exec', '-' * 25)
+net_connect.write_channel('disable\n')
+print(net_connect.find_prompt())
+time.sleep(2)
+output = net_connect.read_channel()
+print(output)
+
+# Enter priviledged exec again
+print('-' * 25, 'Enter Priviledged Exec Again', '-' * 25)
+net_connect.enable()
+print(net_connect.find_prompt())
+
+net_connect.disconnect()
+print('Disconnected')
